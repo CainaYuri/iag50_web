@@ -1,0 +1,460 @@
+# IAG 5.0 — Regras de classificação de itens de NF-e de compra (versão 1)
+# Cada regra decide a CATEGORIA do item. O tratamento tributário vem depois,
+# da tabela tratamento_tributario_v1.yaml (NCM x categoria).
+# STATUS: rascunho — revisar com contadores do piloto antes de usar.
+versao: 1
+vigencia_inicio: 2026-10-14
+
+# ---------------------------------------------------------------------------
+# Taxonomia (vocabulário do sistema)
+# ---------------------------------------------------------------------------
+taxonomia:
+  INS.FER:   Fertilizantes, adubos e biofertilizantes
+  INS.COR:   Corretivos de solo, condicionadores e remineralizadores
+  INS.DEF:   Defensivos agrícolas
+  INS.BIO:   Bioinsumos e bioestimulantes
+  INS.INO:   Inoculantes
+  INS.SEM:   Sementes para semeadura
+  INS.MUD:   Mudas e material propagativo
+  PEC.NUT:   Nutrição animal (ração, sal mineral, farelos, grão para trato)
+  PEC.SAN:   Sanidade animal (vacinas e medicamentos veterinários)
+  PEC.GEN:   Genética animal (sêmen, embriões, ovos fertilizados)
+  PEC.REP:   Reprodutores de raça pura registrados
+  PEC.ANI:   Animais vivos (recria, engorda, aves de um dia)
+  GRAO:      Grão adquirido sem destinação definida
+  COMB.DIE:  Diesel e biodiesel
+  COMB.GAS:  Gasolina
+  COMB.ETA:  Etanol combustível
+  COMB.GLP:  GLP
+  MAN.PEC:   Peças e partes de máquinas
+  MAN.PNE:   Pneus agrícolas e de carga
+  MAN.LUB:   Lubrificantes e graxas
+  IMOB.MAQ:  Máquinas, tratores e implementos agrícolas
+  IMOB.VEI:  Veículos de carga e utilitários
+  MAT.CONST: Materiais de construção e benfeitorias
+  INFRA.CERCA: Cercas, arames e mourões
+  EMB:       Embalagens e sacaria
+  ENER.LENHA: Lenha e biomassa para secagem
+  ALIM.FUNC: Alimentação (possível fornecimento a empregados)
+  ALIM.PET:  Alimento para animais de estimação
+  MED.HUM:   Medicamento de uso humano
+  VEI.PASS:  Automóvel de passageiros
+  PESS:      Uso ou consumo pessoal (crédito vedado)
+  NEUTRO:    Operação sem aquisição onerosa
+  NC:        Não classificado
+
+# ---------------------------------------------------------------------------
+# Dicionário de normalização da descrição (aplicado antes das regras)
+# Chave = padrão (regex, já em MAIÚSCULAS sem acento) ; valor = substituição
+# ---------------------------------------------------------------------------
+abreviacoes:
+  '\bOL\.? ?DIES\b': OLEO DIESEL
+  '\bDIES\b': DIESEL
+  '\bFERT\b': FERTILIZANTE
+  '\bADUB\b': ADUBO
+  '\bSEM\.\b': SEMENTE
+  '\bSMT\b': SEMENTE
+  '\bHERB\b': HERBICIDA
+  '\bFUNG\b': FUNGICIDA
+  '\bINSET\b': INSETICIDA
+  '\bVAC\b': VACINA
+  '\bMED\.? ?VET\b': MEDICAMENTO VETERINARIO
+  '\bSAL MIN\b': SAL MINERAL
+  '\bSC\b': SACO
+  '\bKGS\b': KG
+  '\bPCT\b': PACOTE
+
+# ---------------------------------------------------------------------------
+# Regras. Campos de condição (todos opcionais, combinados com E):
+#   cfop_em, ncm_prefixos, ncm_excluir, desc_regex, desc_nao_regex,
+#   cnae_emitente_em
+# Prioridade: CAMADA 1 (100s) > 2 (200s) > 3 (300s) > 4 (400s) > 5 (500s).
+# Dentro da camada NCM, vence o prefixo mais longo.
+# ---------------------------------------------------------------------------
+regras:
+
+  # ===== CAMADA 1 — Operação (CFOP do emitente) =====
+  - id: R1-REMESSA-CONSERTO
+    camada: 1
+    condicoes: {cfop_em: ["5915", "6915", "5916", "6916"]}
+    resultado: {categoria: NEUTRO, confianca: 0.98}
+    explicacao: Remessa/retorno para conserto não é aquisição
+  - id: R1-COMODATO
+    camada: 1
+    condicoes: {cfop_em: ["5908", "6908", "5909", "6909"]}
+    resultado: {categoria: NEUTRO, confianca: 0.98}
+    explicacao: Comodato não é aquisição onerosa
+  - id: R1-DEMONSTRACAO
+    camada: 1
+    condicoes: {cfop_em: ["5912", "6912", "5913", "6913"]}
+    resultado: {categoria: NEUTRO, confianca: 0.98}
+    explicacao: Remessa/retorno de demonstração
+  - id: R1-DEPOSITO-ARMAZEM
+    camada: 1
+    condicoes: {cfop_em: ["5905", "6905", "5906", "6906", "5907", "6907"]}
+    resultado: {categoria: NEUTRO, confianca: 0.97}
+    explicacao: Remessa/retorno de depósito ou armazém geral
+  - id: R1-ENTREGA-FUTURA-FATURAMENTO
+    camada: 1
+    condicoes: {cfop_em: ["5922", "6922"]}
+    resultado: {categoria: NEUTRO, confianca: 0.95, alerta: ENTREGA_FUTURA}
+    explicacao: >-
+      Simples faturamento de venda para entrega futura. Não contar este item;
+      o insumo será contado na nota de remessa (CFOP 5116/5117/6116/6117).
+      Evita dupla contagem — muito comum na compra antecipada de insumos.
+  - id: R1-BONIFICACAO
+    camada: 1
+    condicoes: {cfop_em: ["5910", "6910"]}
+    resultado: {categoria: NEUTRO, confianca: 0.80, alerta: REVISAR_BONIFICACAO}
+    explicacao: Bonificação/brinde — verificar se houve destaque de IBS/CBS
+  - id: R1-TRANSFERENCIA
+    camada: 1
+    condicoes: {cfop_em: ["5151", "6151", "5152", "6152"]}
+    resultado: {categoria: NEUTRO, confianca: 0.90}
+    explicacao: Transferência entre estabelecimentos do mesmo titular
+
+  # ===== CAMADA 2 — Vedações (art. 57) =====
+  - id: R2-BEBIDA-ALCOOLICA
+    camada: 2
+    condicoes: {ncm_prefixos: ["2203", "2204", "2205", "2206", "2208"]}
+    resultado: {categoria: PESS, confianca: 0.97}
+    explicacao: Bebida alcoólica (art. 57, I, 'c')
+  - id: R2-TABACO
+    camada: 2
+    condicoes: {ncm_prefixos: ["24"]}
+    resultado: {categoria: PESS, confianca: 0.97}
+    explicacao: Derivados do tabaco (art. 57, I, 'd')
+  - id: R2-JOIAS-METAIS
+    camada: 2
+    condicoes: {ncm_prefixos: ["7101", "7102", "7103", "7104", "7108", "7113", "7114"]}
+    resultado: {categoria: PESS, confianca: 0.95}
+    explicacao: Joias, pedras e metais preciosos (art. 57, I, 'a')
+  - id: R2-ARMAS
+    camada: 2
+    condicoes: {ncm_prefixos: ["9301", "9302", "9303", "9304", "9305", "9306"]}
+    resultado: {categoria: PESS, confianca: 0.93}
+    explicacao: Armas e munições (art. 57, I, 'e')
+  - id: R2-LAZER-ESTETICA
+    camada: 2
+    condicoes: {ncm_prefixos: ["9503", "9504", "9506", "3303", "3304", "3305", "9701"]}
+    resultado: {categoria: PESS, confianca: 0.90}
+    explicacao: Bens recreativos, esportivos, estéticos ou obras de arte (art. 57, I)
+  - id: R2-DESC-BEBIDA
+    camada: 2
+    condicoes: {desc_regex: '\b(CERVEJA|WHISK|VODKA|CACHACA|VINHO|CHOPP)\b'}
+    resultado: {categoria: PESS, confianca: 0.90}
+    explicacao: Descrição indica bebida alcoólica
+
+  # ===== CAMADA 3 — NCM =====
+  # --- Fertilizantes e corretivos ---
+  - id: R3-NCM-31
+    camada: 3
+    condicoes: {ncm_prefixos: ["31"]}
+    resultado: {categoria: INS.FER, confianca: 0.95}
+    explicacao: Capítulo 31 — fertilizantes (Anexo IX, itens 1 e 2)
+  - id: R3-NCM-382499-FERT
+    camada: 3
+    condicoes: {ncm_prefixos: ["38249977", "38249979"]}
+    resultado: {categoria: INS.FER, confianca: 0.90}
+    explicacao: Preparações fertilizantes (Anexo IX, item 2)
+  - id: R3-NCM-2521-CALCARIO
+    camada: 3
+    condicoes: {ncm_prefixos: ["2521"]}
+    resultado: {categoria: INS.COR, confianca: 0.93}
+    explicacao: Calcário (corretivo de solo — Anexo IX, item 3)
+  - id: R3-NCM-2520-GESSO
+    camada: 3
+    condicoes: {ncm_prefixos: ["2520"], desc_regex: '\b(AGRIC|GESSO AGR|AGRICOLA)'}
+    resultado: {categoria: INS.COR, confianca: 0.90}
+    explicacao: Gesso agrícola (condicionador de solo)
+  - id: R3-NCM-25-CONSTRUCAO
+    camada: 3
+    condicoes: {ncm_prefixos: ["2505", "2517", "2522", "2523"]}
+    resultado: {categoria: MAT.CONST, confianca: 0.90}
+    explicacao: >-
+      Areia, brita, cal e cimento estão no capítulo 25, mas não são corretivos.
+      Esta regra impede que o capítulo inteiro vire "insumo do Anexo IX".
+  - id: R3-NCM-2501-SAL
+    camada: 3
+    condicoes: {ncm_prefixos: ["2501"], desc_regex: '\b(MINERAL|MINERALIZADO|BOVINO|GADO|PROTEINADO)\b'}
+    resultado: {categoria: PEC.NUT, confianca: 0.92}
+    explicacao: Sal mineralizado para alimentação animal (Anexo IX, item 21)
+  - id: R3-NCM-25-GENERICO
+    camada: 3
+    condicoes: {ncm_prefixos: ["25"]}
+    resultado: {categoria: INS.COR, confianca: 0.60}
+    explicacao: Capítulo 25 sem regra específica — provável corretivo, confiança baixa
+
+  # --- Defensivos, bioinsumos, inoculantes ---
+  - id: R3-NCM-3808
+    camada: 3
+    condicoes: {ncm_prefixos: ["3808"], desc_nao_regex: '\b(AEROSOL|DOMESTIC|REPELENTE|SPRAY)\b'}
+    resultado: {categoria: INS.DEF, confianca: 0.93}
+    explicacao: Defensivos (Anexo IX, item 6)
+  - id: R3-NCM-3808-DOMESTICO
+    camada: 3
+    condicoes: {ncm_prefixos: ["3808"], desc_regex: '\b(AEROSOL|DOMESTIC|REPELENTE|SPRAY)\b'}
+    resultado: {categoria: PESS, confianca: 0.70, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Inseticida de uso doméstico não é insumo agropecuário
+  - id: R3-NCM-INOCULANTE
+    camada: 3
+    condicoes: {ncm_prefixos: ["300249", "30029000", "38210000"], desc_regex: '\b(INOCULANTE|BRADYRHIZOBIUM|AZOSPIRILLUM|RHIZOBIUM|BACILLUS|TRICHODERMA)'}
+    resultado: {categoria: INS.INO, confianca: 0.92}
+    explicacao: Inoculantes e microrganismos agrícolas (Anexo IX, item 4)
+
+  # --- Sementes e mudas ---
+  - id: R3-NCM-1209
+    camada: 3
+    condicoes: {ncm_prefixos: ["1209"]}
+    resultado: {categoria: INS.SEM, confianca: 0.93}
+    explicacao: Sementes para semeadura (Anexo IX, item 10)
+  - id: R3-NCM-SOJA-SEMEADURA
+    camada: 3
+    condicoes: {ncm_prefixos: ["12011000"]}
+    resultado: {categoria: INS.SEM, confianca: 0.95}
+    explicacao: Soja para semeadura (Anexo IX, item 10)
+  - id: R3-NCM-MILHO-SEMEADURA
+    camada: 3
+    condicoes: {ncm_prefixos: ["100510"]}
+    resultado: {categoria: INS.SEM, confianca: 0.95}
+    explicacao: Milho para semeadura (Anexo IX, item 10)
+  - id: R3-NCM-GRAOS
+    camada: 3
+    condicoes: {ncm_prefixos: ["10", "12"]}
+    resultado: {categoria: GRAO, confianca: 0.60, alerta: DEFINIR_DESTINACAO}
+    explicacao: Grão — destinação (ração, semente, revenda) define o tratamento
+  - id: R3-NCM-MUDAS
+    camada: 3
+    condicoes: {ncm_prefixos: ["0601", "0602"]}
+    resultado: {categoria: INS.MUD, confianca: 0.92}
+    explicacao: Mudas (Anexo IX, item 11)
+
+  # --- Pecuária ---
+  - id: R3-NCM-RACAO
+    camada: 3
+    condicoes: {ncm_prefixos: ["230990"]}
+    resultado: {categoria: PEC.NUT, confianca: 0.93}
+    explicacao: Ração, suplemento, núcleo (Anexo IX, item 18)
+  - id: R3-NCM-PET
+    camada: 3
+    condicoes: {ncm_prefixos: ["230910"]}
+    resultado: {categoria: ALIM.PET, confianca: 0.90, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Alimento para cães e gatos — fora do Anexo IX
+  - id: R3-NCM-FARELOS
+    camada: 3
+    condicoes: {ncm_prefixos: ["2301", "2302", "2303", "2304", "2305", "2306", "2308"]}
+    resultado: {categoria: PEC.NUT, confianca: 0.85}
+    explicacao: Farelos e tortas para alimentação animal (Anexo IX, item 20)
+  - id: R3-NCM-VACINA-VET
+    camada: 3
+    condicoes: {ncm_prefixos: ["300212", "300215", "300242"], desc_regex: '\b(VET|BOVIN|SUIN|AVES|AFTOSA|BRUCELOSE|CLOSTRID|RAIVA|LEPTOSPIROSE|IBR|BVD)'}
+    resultado: {categoria: PEC.SAN, confianca: 0.93}
+    explicacao: Vacina/soro de uso veterinário (Anexo IX, item 12)
+  - id: R3-NCM-3004-VET
+    camada: 3
+    condicoes: {ncm_prefixos: ["3004"], desc_regex: '\b(VET|BOVIN|SUIN|EQUIN|IVERMECTINA|ABAMECTINA|DORAMECTINA|OXITETRACICLINA|CARRAPATICIDA|VERMIFUGO|BERNICIDA)'}
+    resultado: {categoria: PEC.SAN, confianca: 0.90}
+    explicacao: Medicamento veterinário (Anexo IX, item 12)
+  - id: R3-NCM-3004-HUMANO
+    camada: 3
+    condicoes: {ncm_prefixos: ["3004"]}
+    resultado: {categoria: MED.HUM, confianca: 0.65, alerta: REVISAR_USO_PESSOAL}
+    explicacao: >-
+      Posição 30.04 também inclui medicamento humano. Sem indício veterinário
+      na descrição, não presumir Anexo IX.
+  - id: R3-NCM-SEMEN
+    camada: 3
+    condicoes: {ncm_prefixos: ["05111000", "05119", "04071"]}
+    resultado: {categoria: PEC.GEN, confianca: 0.93}
+    explicacao: Sêmen, embriões, ovos fertilizados (Anexo IX, itens 14 e 16)
+  - id: R3-NCM-AVES-DE-UM-DIA
+    camada: 3
+    condicoes: {ncm_prefixos: ["01051"]}
+    resultado: {categoria: PEC.ANI, confianca: 0.92}
+    explicacao: Aves de um dia (Anexo IX, item 13)
+  - id: R3-NCM-REPRODUTOR
+    camada: 3
+    condicoes: {ncm_prefixos: ["0102", "0103", "0104"], desc_regex: '\b(REPRODUTOR|MATRIZ|PO\b|PURO DE ORIGEM|PURA|REGISTRO GENEAL|RGD)'}
+    resultado: {categoria: PEC.REP, confianca: 0.85, alerta: CONFERIR_REGISTRO_GENEALOGICO}
+    explicacao: Reprodutor de raça pura (Anexo IX, item 15) — exige registro
+  - id: R3-NCM-ANIMAIS-VIVOS
+    camada: 3
+    condicoes: {ncm_prefixos: ["0102", "0103", "0104"]}
+    resultado: {categoria: PEC.ANI, confianca: 0.88}
+    explicacao: Animais vivos para recria/engorda (art. 137)
+
+  # --- Combustíveis e lubrificantes ---
+  - id: R3-NCM-DIESEL
+    camada: 3
+    condicoes: {ncm_prefixos: ["2710192"]}
+    resultado: {categoria: COMB.DIE, confianca: 0.95}
+    explicacao: Óleo diesel (regime monofásico)
+  - id: R3-NCM-BIODIESEL
+    camada: 3
+    condicoes: {ncm_prefixos: ["3826"]}
+    resultado: {categoria: COMB.DIE, confianca: 0.90}
+    explicacao: Biodiesel (regime monofásico)
+  - id: R3-NCM-GASOLINA
+    camada: 3
+    condicoes: {ncm_prefixos: ["271012"]}
+    resultado: {categoria: COMB.GAS, confianca: 0.93, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Gasolina — em fazenda, costuma abastecer veículo de passeio
+  - id: R3-NCM-ETANOL
+    camada: 3
+    condicoes: {ncm_prefixos: ["2207"]}
+    resultado: {categoria: COMB.ETA, confianca: 0.85, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Etanol combustível — verificar vínculo com a atividade
+  - id: R3-NCM-GLP
+    camada: 3
+    condicoes: {ncm_prefixos: ["27111910"]}
+    resultado: {categoria: COMB.GLP, confianca: 0.92}
+    explicacao: GLP (regime monofásico)
+  - id: R3-NCM-LUBRIFICANTE
+    camada: 3
+    condicoes: {ncm_prefixos: ["2710193", "3403"]}
+    resultado: {categoria: MAN.LUB, confianca: 0.90}
+    explicacao: Lubrificantes e graxas
+
+  # --- Máquinas, peças, pneus, veículos ---
+  - id: R3-NCM-PARTES-MAQ-AGRIC
+    camada: 3
+    condicoes: {ncm_prefixos: ["843290", "843390", "843490", "843699", "870899", "8431"]}
+    resultado: {categoria: MAN.PEC, confianca: 0.90}
+    explicacao: Partes e peças de máquinas e veículos
+  - id: R3-NCM-MAQ-AGRIC
+    camada: 3
+    condicoes: {ncm_prefixos: ["8432", "8433", "8434", "8436", "8701", "8716", "842441", "842449", "842482"]}
+    resultado: {categoria: IMOB.MAQ, confianca: 0.92}
+    explicacao: Máquinas, tratores, implementos, pulverizadores e irrigação
+  - id: R3-NCM-PNEU-AGRIC
+    camada: 3
+    condicoes: {ncm_prefixos: ["401170", "401120"]}
+    resultado: {categoria: MAN.PNE, confianca: 0.92}
+    explicacao: Pneus agrícolas/florestais e de carga
+  - id: R3-NCM-PNEU-PASSEIO
+    camada: 3
+    condicoes: {ncm_prefixos: ["401110"]}
+    resultado: {categoria: VEI.PASS, confianca: 0.75, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Pneu de automóvel de passageiros
+  - id: R3-NCM-AUTOMOVEL
+    camada: 3
+    condicoes: {ncm_prefixos: ["8703"]}
+    resultado: {categoria: VEI.PASS, confianca: 0.90, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Automóvel de passageiros (art. 57, § 1º, II)
+  - id: R3-NCM-CAMINHAO-UTILITARIO
+    camada: 3
+    condicoes: {ncm_prefixos: ["8704"]}
+    resultado: {categoria: IMOB.VEI, confianca: 0.80, alerta: CONFIRMAR_VINCULO}
+    explicacao: Caminhão/caminhonete — confirmar uso na atividade
+
+  # --- Infraestrutura, embalagens, energia ---
+  - id: R3-NCM-ARAME-CERCA
+    camada: 3
+    condicoes: {ncm_prefixos: ["7313", "7314", "721720"]}
+    resultado: {categoria: INFRA.CERCA, confianca: 0.88}
+    explicacao: Arames e telas para cercas
+  - id: R3-NCM-MAT-CONST
+    camada: 3
+    condicoes: {ncm_prefixos: ["7308", "7214", "7216", "6810", "6904", "6907", "7610"]}
+    resultado: {categoria: MAT.CONST, confianca: 0.85}
+    explicacao: Materiais de construção (benfeitorias)
+  - id: R3-NCM-SACARIA
+    camada: 3
+    condicoes: {ncm_prefixos: ["6305", "3923"]}
+    resultado: {categoria: EMB, confianca: 0.85}
+    explicacao: Sacaria, big bags e embalagens
+  - id: R3-NCM-LENHA
+    camada: 3
+    condicoes: {ncm_prefixos: ["44011", "440122", "440131", "440139"]}
+    resultado: {categoria: ENER.LENHA, confianca: 0.85}
+    explicacao: >-
+      Lenha/cavaco para secagem. Atenção: Anexo IX item 7 cita 4401.39 e 4401.4
+      só quando destinados à fabricação de fertilizantes — não se aplica à secagem.
+
+  # ===== CAMADA 4 — Fornecedor (CNAE do emitente) =====
+  # Usada para reforçar/ajustar quando a camada 3 é fraca ou ausente.
+  - id: R4-CNAE-SUPERMERCADO
+    camada: 4
+    condicoes: {cnae_emitente_em: ["4711301", "4711302", "4712100"]}
+    resultado: {categoria: ALIM.FUNC, confianca: 0.60, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Compra em supermercado — uso pessoal ou alimentação de empregados
+  - id: R4-CNAE-PET
+    camada: 4
+    condicoes: {cnae_emitente_em: ["4789004"]}
+    resultado: {categoria: ALIM.PET, confianca: 0.65, alerta: REVISAR_USO_PESSOAL}
+    explicacao: Pet shop
+  - id: R4-CNAE-POSTO
+    camada: 4
+    condicoes: {cnae_emitente_em: ["4731800"]}
+    resultado: {categoria: COMB.DIE, confianca: 0.55}
+    explicacao: Posto de combustível — combustível provável; confirmar pelo NCM
+
+  # ===== CAMADA 5 — Descrição (quando NCM não decide) =====
+  - id: R5-DESC-FERTILIZANTE
+    camada: 5
+    condicoes: {desc_regex: '\b(ADUBO|FERTILIZANTE|NPK|UREIA|SUPERFOSFATO|CLORETO DE POTASSIO|KCL|SULFATO DE AMONIO|MAP\b|\d{1,2}-\d{1,2}-\d{1,2})'}
+    resultado: {categoria: INS.FER, confianca: 0.80}
+    explicacao: Descrição indica fertilizante
+  - id: R5-DESC-CORRETIVO
+    camada: 5
+    condicoes: {desc_regex: '\b(CALCARIO|GESSO AGRICOLA|REMINERALIZADOR|PO DE ROCHA)'}
+    resultado: {categoria: INS.COR, confianca: 0.80}
+    explicacao: Descrição indica corretivo de solo
+  - id: R5-DESC-DEFENSIVO
+    camada: 5
+    condicoes: {desc_regex: '\b(HERBICIDA|FUNGICIDA|INSETICIDA|ACARICIDA|NEMATICIDA|GLIFOSATO|ATRAZINA|2,4-D|MANCOZEBE|ADJUVANTE|ESPALHANTE)', desc_nao_regex: '\b(AEROSOL|DOMESTIC|REPELENTE|SPRAY)\b'}
+    resultado: {categoria: INS.DEF, confianca: 0.80}
+    explicacao: Descrição indica defensivo
+  - id: R5-DESC-SEMENTE
+    camada: 5
+    condicoes: {desc_regex: '\bSEMENTE'}
+    resultado: {categoria: INS.SEM, confianca: 0.78}
+    explicacao: Descrição indica semente
+  - id: R5-DESC-NUTRICAO
+    camada: 5
+    condicoes: {desc_regex: '\b(RACAO|SAL MINERAL|SUPLEMENTO MINERAL|NUCLEO|PROTEINADO|PREMIX|FARELO)', desc_nao_regex: '\b(CAES|CAO|GATOS?|PET|FILHOTES?)\b'}
+    resultado: {categoria: PEC.NUT, confianca: 0.78}
+    explicacao: Descrição indica nutrição animal
+  - id: R5-DESC-VACINA
+    camada: 5
+    condicoes: {desc_regex: '\b(VACINA|MEDICAMENTO VETERINARIO|VERMIFUGO|CARRAPATICIDA)'}
+    resultado: {categoria: PEC.SAN, confianca: 0.78}
+    explicacao: Descrição indica sanidade animal
+  - id: R5-DESC-DIESEL
+    camada: 5
+    condicoes: {desc_regex: '\b(OLEO DIESEL|DIESEL S ?10|DIESEL S ?500)'}
+    resultado: {categoria: COMB.DIE, confianca: 0.85}
+    explicacao: Descrição indica diesel
+  - id: R5-DESC-PNEU
+    camada: 5
+    condicoes: {desc_regex: '\bPNEU'}
+    resultado: {categoria: MAN.PNE, confianca: 0.70}
+    explicacao: Descrição indica pneu
+  - id: R5-DESC-PECAS
+    camada: 5
+    condicoes: {desc_regex: '\b(FILTRO|ROLAMENTO|CORREIA|RETENTOR|MANGUEIRA|DISCO DE CORTE|PONTEIRA|BICO PULVERIZ|LAMINA|PARAFUSO)'}
+    resultado: {categoria: MAN.PEC, confianca: 0.70}
+    explicacao: Descrição indica peça de manutenção
+  - id: R5-DESC-AMOSTRA
+    camada: 5
+    condicoes: {desc_regex: '\b(AMOSTRA GRATIS|BRINDE)'}
+    resultado: {categoria: NEUTRO, confianca: 0.80}
+    explicacao: Amostra ou brinde
+
+# ---------------------------------------------------------------------------
+# Validações documentais (geram ALERTAS, não categorias)
+# ---------------------------------------------------------------------------
+validacoes:
+  DESCRICAO_GENERICA:
+    desc_regex: '^(MATERIAL|MATERIAIS|PRODUTO|PRODUTOS|MERCADORIA|DIVERSOS|CONF\.? PEDIDO|CONFORME PEDIDO)\b'
+    mensagem: Descrição genérica demais para sustentar o crédito
+  FORNECEDOR_SIMPLES:
+    crt_em: ["1", "2", "4"]
+    mensagem: Fornecedor do Simples Nacional — crédito limitado e sem diferimento do Anexo IX
+  FORNECEDOR_PESSOA_FISICA:
+    emitente_cpf: true
+    mensagem: Emitente pessoa física — verificar crédito presumido (art. 168)
+  DESTINATARIO_DIVERGENTE:
+    mensagem: Destinatário diferente do produtor ou de suas inscrições estaduais
+  NCM_DESCRICAO_INCOERENTE:
+    mensagem: Categoria pelo NCM difere da categoria pela descrição — revisar

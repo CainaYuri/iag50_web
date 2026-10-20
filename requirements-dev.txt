@@ -1,0 +1,3 @@
+# Bibliotecas para desenvolvimento e testes (não precisam ir para o servidor)
+-r requirements.txt
+pytest>=8.0

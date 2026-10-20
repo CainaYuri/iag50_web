@@ -1,0 +1,10 @@
+# Bibliotecas usadas pelo aplicativo (instaladas também pelo Streamlit Community Cloud)
+streamlit>=1.50        # interface web
+pandas>=2.0            # tabelas de dados
+pyyaml>=6.0            # leitura dos arquivos de regras
+openpyxl>=3.1          # geração de arquivos Excel
+nfelib>=3.2            # leitura de XML de NF-e (com grupo IBS/CBS)
+lxml>=5.0              # leitor de XML usado pela nfelib e pela validação de schema
+validate-docbr>=2.0    # validação de CPF e CNPJ
+pydantic>=2.7          # validação dos arquivos de regras
+requests>=2.31         # consulta de CNPJ na BrasilAPI

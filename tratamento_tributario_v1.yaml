@@ -1,0 +1,162 @@
+# IAG 5.0 — Tabela de tratamento tributário IBS/CBS (versão 1)
+# Fonte: LC 214/2025 (texto consolidado, com alterações da LC 227/2026 e LC 235/2026),
+#        Anexo IX conforme publicação do Senado Federal.
+# STATUS: rascunho técnico — TODAS as linhas exigem revisão de especialista tributário
+#         antes do uso em relatório para cliente. Conferir redação vigente e atos de
+#         revisão do Anexo IX (art. 138, § 10: revisão a cada 120 dias).
+versao: 1
+vigencia_inicio: 2026-10-14
+referencia_legal: "LC 214/2025 consolidada até LC 235/2026 (27/08/2026)"
+
+# ---------------------------------------------------------------------------
+# 1. Catálogo de tratamentos (o "efeito" que o simulador usa)
+# ---------------------------------------------------------------------------
+tratamentos:
+  T00:
+    nome: Alíquota padrão — crédito integral
+    reducao: 0.0
+    diferimento: false
+    efeito_credito: CREDITO_INTEGRAL
+    fundamento: "Art. 47 (não cumulatividade ampla)"
+    cclasstrib_ref: "000001 (conferir)"
+    cclasstrib_esperados: ["000001"]
+  T01:
+    nome: Insumo agropecuário Anexo IX — redução 60% com diferimento
+    reducao: 0.60
+    diferimento: true
+    efeito_credito: SEM_CREDITO_DIFERIDO
+    fundamento: "Art. 138, caput, § 1º e § 2º, I, 'a'"
+    cclasstrib_ref: "515001 diferido / 200038 sem diferimento (conferir)"
+    cclasstrib_esperados: ["515001"]   # 200038 indica que o fornecedor não aplicou o diferimento
+    nota: >-
+      Fornecedor do regime regular -> produtor contribuinte: recolhimento diferido.
+      Não há imposto destacado nem crédito para o produtor; o insumo chega sem
+      IBS/CBS no preço. Redução só vale com registro no MAPA quando exigido (§ 1º).
+      Fornecedor do Simples Nacional não está no diferimento (§ 2º, I) — ver modificador.
+  T02:
+    nome: Produto agropecuário in natura — redução 60%
+    reducao: 0.60
+    diferimento: false
+    efeito_credito: CREDITO_INTEGRAL
+    fundamento: "Art. 137"
+    cclasstrib_ref: "conferir tabela oficial"
+    nota: "Crédito calculado sobre a alíquota reduzida (40% da alíquota padrão)."
+  T03:
+    nome: Combustível — regime monofásico (ad rem)
+    reducao: null
+    diferimento: false
+    efeito_credito: CREDITO_AD_REM
+    fundamento: "Arts. 172 a 180; art. 180, § 1º c/c art. 47, § 4º"
+    cclasstrib_ref: "conferir tabela oficial"
+    nota: >-
+      Crédito = valor fixo por unidade (litro/kg) definido para o combustível,
+      não percentual sobre o preço. Parametrizar R$/unidade no simulador.
+  T04:
+    nome: Uso ou consumo pessoal — crédito vedado
+    reducao: null
+    diferimento: false
+    efeito_credito: VEDADO
+    fundamento: "Art. 57, I e § 5º"
+  T05:
+    nome: Operação sem aquisição onerosa
+    reducao: null
+    diferimento: false
+    efeito_credito: NEUTRO
+    fundamento: "Não há fornecimento oneroso ao produtor"
+  T07:
+    nome: Depende de destinação ou vínculo — revisão obrigatória
+    reducao: null
+    diferimento: null
+    efeito_credito: REVISAR
+    fundamento: "Art. 57 (uso pessoal x atividade) ou condição do Anexo IX"
+
+# ---------------------------------------------------------------------------
+# 2. Mapeamento NCM x categoria -> tratamento (COMPRAS do produtor)
+#    Regra de busca: prefixo de NCM mais longo que case com a categoria do item.
+#    'categorias' vazia = vale para qualquer categoria.
+# ---------------------------------------------------------------------------
+mapa_entradas:
+  # ---- Anexo IX (art. 138) ----
+  - {id: AIX-01, ncm: ["31010000"], categorias: [INS.FER], tratamento: T01, anexo_item: "IX-1", descricao: "Biofertilizantes"}
+  - {id: AIX-02, ncm: ["31", "38249977", "38249979", "38249989"], categorias: [INS.FER], tratamento: T01, anexo_item: "IX-2", descricao: "Fertilizantes (adubos)"}
+  - {id: AIX-03, ncm: ["25"], categorias: [INS.COR], tratamento: T01, anexo_item: "IX-3", descricao: "Corretivos de solo, condicionadores, remineralizadores, substratos"}
+  - {id: AIX-04, ncm: ["300249", "30029000", "38210000"], categorias: [INS.INO], tratamento: T01, anexo_item: "IX-4", descricao: "Inoculantes e microrganismos de uso agrícola"}
+  - {id: AIX-05, ncm: ["3824", "38070000", "1211", "3808"], categorias: [INS.BIO], tratamento: T01, anexo_item: "IX-5", descricao: "Bioestimulantes e bioinsumos fitossanitários"}
+  - {id: AIX-06, ncm: ["3808", "38249989"], categorias: [INS.DEF], tratamento: T01, anexo_item: "IX-6", descricao: "Defensivos agropecuários"}
+  - {id: AIX-10, ncm: ["07", "10", "12"], categorias: [INS.SEM], tratamento: T01, anexo_item: "IX-10", descricao: "Sementes (genética, básica, C1, C2, S1, S2, crioulas)"}
+  - {id: AIX-11, ncm: ["0601", "0602"], categorias: [INS.MUD], tratamento: T01, anexo_item: "IX-11", descricao: "Mudas e material propagativo"}
+  - {id: AIX-12, ncm: ["300212", "300215", "300242", "30029000", "3004"], categorias: [PEC.SAN], tratamento: T01, anexo_item: "IX-12", descricao: "Vacinas, soros e medicamentos veterinários (exceto animais domésticos)"}
+  - {id: AIX-13, ncm: ["01051"], categorias: [PEC.ANI], tratamento: T01, anexo_item: "IX-13", descricao: "Aves de um dia (exceto ornamentais)"}
+  - {id: AIX-14, ncm: ["05111000", "05119"], categorias: [PEC.GEN], tratamento: T01, anexo_item: "IX-14", descricao: "Embriões e sêmen"}
+  - {id: AIX-15, ncm: ["0102", "0103", "0104"], categorias: [PEC.REP], tratamento: T01, anexo_item: "IX-15", descricao: "Reprodutores de raça pura com registro genealógico"}
+  - {id: AIX-16, ncm: ["04071"], categorias: [PEC.GEN], tratamento: T01, anexo_item: "IX-16", descricao: "Ovos fertilizados"}
+  - {id: AIX-17, ncm: ["01069000"], categorias: [PEC.ANI], tratamento: T01, anexo_item: "IX-17", descricao: "Girinos e alevinos"}
+  - {id: AIX-18, ncm: ["230990"], categorias: [PEC.NUT], tratamento: T01, anexo_item: "IX-18", descricao: "Rações, concentrados, suplementos, premix, núcleo (exceto domésticos)"}
+  - {id: AIX-19, ncm: ["10", "11", "12"], categorias: [PEC.NUT], tratamento: T01, anexo_item: "IX-19", descricao: "Grãos e cereais destinados à alimentação animal"}
+  - {id: AIX-20, ncm: ["2301", "2302", "2303", "230400", "23050000", "2306", "23080000"], categorias: [PEC.NUT], tratamento: T01, anexo_item: "IX-20", descricao: "Farelos, tortas e resíduos para alimentação animal"}
+  - {id: AIX-21, ncm: ["0210", "0309", "07129010", "15", "250100", "25210000", "293040"], categorias: [PEC.NUT], tratamento: T01, anexo_item: "IX-21", descricao: "Sal mineralizado, farinhas animais, calcário calcítico, óleos etc. para ração"}
+  - {id: AIX-35, ncm: ["23033000", "23032000"], categorias: [INS.FER], tratamento: T01, anexo_item: "IX-35", descricao: "Vinhaça"}
+  # ---- In natura (art. 137) ----
+  - {id: NAT-01, ncm: ["0102", "0103", "0104"], categorias: [PEC.ANI], tratamento: T02, anexo_item: "art. 137", descricao: "Animais vivos para recria/engorda (não reprodutores registrados)"}
+  - {id: NAT-02, ncm: ["10", "12"], categorias: [GRAO], tratamento: T07, anexo_item: "art. 137 / IX-19", descricao: "Grão adquirido — tratamento depende da destinação (ração x revenda)"}
+  # ---- Combustíveis (regime específico) ----
+  - {id: CMB-01, ncm: ["2710192"], categorias: [COMB.DIE], tratamento: T03, anexo_item: "arts. 172-180", descricao: "Óleo diesel"}
+  - {id: CMB-02, ncm: ["271012"], categorias: [COMB.GAS], tratamento: T07, anexo_item: "arts. 172-180 / art. 57", descricao: "Gasolina — risco de uso pessoal (veículo)"}
+  - {id: CMB-03, ncm: ["2207"], categorias: [COMB.ETA], tratamento: T07, anexo_item: "arts. 172-180 / art. 57", descricao: "Etanol — risco de uso pessoal (veículo)"}
+  - {id: CMB-04, ncm: ["27111910"], categorias: [COMB.GLP], tratamento: T03, anexo_item: "arts. 172-180", descricao: "GLP (ex.: secagem de grãos)"}
+  - {id: CMB-05, ncm: ["3826"], categorias: [COMB.DIE], tratamento: T03, anexo_item: "arts. 172-180", descricao: "Biodiesel"}
+  # ---- Revisão obrigatória por natureza ----
+  - {id: REV-01, ncm: ["8703"], categorias: [], tratamento: T07, anexo_item: "art. 57, § 1º, II", descricao: "Automóvel de passageiros"}
+  - {id: REV-02, ncm: ["230910"], categorias: [], tratamento: T07, anexo_item: "fora do Anexo IX", descricao: "Alimento para cães e gatos"}
+  - {id: REV-03, ncm: ["3004"], categorias: [MED.HUM], tratamento: T07, anexo_item: "art. 57", descricao: "Medicamento de uso humano"}
+  - {id: REV-04, ncm: [], categorias: [ALIM.FUNC], tratamento: T07, anexo_item: "art. 57, § 3º, IV, 'c'", descricao: "Alimentação — crédito só se fornecida a empregados no estabelecimento"}
+
+# Regras que valem só pela categoria (aplicadas antes do mapa por NCM)
+mapa_por_categoria:
+  PESS: T04
+  NEUTRO: T05
+  COMB.DIE: T03
+  COMB.GLP: T03
+  COMB.GAS: T07
+  COMB.ETA: T07
+  GRAO: T07
+  MED.HUM: T07
+  ALIM.FUNC: T07
+  VEI.PASS: T07
+  ALIM.PET: T07
+  NC: T07
+# Observação: categorias de insumo (INS.*, PEC.NUT, PEC.SAN, PEC.GEN, PEC.REP) cujo
+# NCM não esteja nas linhas do Anexo IX vão para T07 com alerta TRATAMENTO_INDEFINIDO
+# (o motor não presume benefício sem NCM compatível).
+
+# Tratamento quando nenhuma linha do mapa casa
+tratamento_padrao: T00
+
+# ---------------------------------------------------------------------------
+# 3. Modificadores pelo regime do FORNECEDOR (aplicados depois do mapa)
+# ---------------------------------------------------------------------------
+modificadores_fornecedor:
+  SIMPLES:
+    condicao: "CRT do emitente = 1, 2 ou 4 (Simples Nacional / MEI)"
+    efeito_credito: CREDITO_SIMPLES
+    nota: >-
+      Sem diferimento do Anexo IX (exige fornecedor do regime regular).
+      Crédito limitado ao valor recolhido no Simples, salvo opção do fornecedor
+      pelo regime regular de IBS/CBS. Conferir dispositivo e regulamento.
+  PRODUTOR_NAO_CONTRIBUINTE:
+    condicao: "Emitente pessoa física (CPF) ou produtor rural não contribuinte (art. 164)"
+    efeito_credito: CREDITO_PRESUMIDO
+    nota: "Crédito presumido do art. 168, com percentuais definidos em ato do Executivo."
+
+# ---------------------------------------------------------------------------
+# 4. Tratamento das VENDAS do produtor (para o cálculo do débito) — a validar
+# ---------------------------------------------------------------------------
+tratamento_saidas:
+  - {id: SAI-01, produto: "Soja e milho em grão — mercado interno (indústria, trading)", ncm: "10 / 12", tratamento: "Redução 60%", efeito_debito: "Débito sobre 40% da alíquota padrão", fundamento: "Art. 137; Anexo VII, item 15", status: "A validar"}
+  - {id: SAI-02, produto: "Grãos vendidos a contribuinte para fabricação de ração ou alimentação animal", ncm: "10 / 11 / 12", tratamento: "Redução 60% + diferimento", efeito_debito: "Sem recolhimento na venda (diferido ao adquirente)", fundamento: "Art. 138, § 2º, I, 'a'; Anexo IX, item 19", status: "A validar"}
+  - {id: SAI-03, produto: "Exportação direta ou com fim específico de exportação", ncm: "Diversos", tratamento: "Não incidência com manutenção de créditos", efeito_debito: "Sem débito; créditos mantidos", fundamento: "Arts. 79 a 82 (art. 82 alterado pela LC 235/2026)", status: "A validar"}
+  - {id: SAI-04, produto: "Bovinos vivos para abate", ncm: "0102", tratamento: "Redução 60%", efeito_debito: "Débito sobre 40% da alíquota padrão", fundamento: "Art. 137", status: "A validar"}
+  - {id: SAI-05, produto: "Reprodutores de raça pura com registro genealógico", ncm: "0102 / 0103 / 0104", tratamento: "Redução 60% + diferimento (adquirente contribuinte)", efeito_debito: "Sem recolhimento se adquirente contribuinte", fundamento: "Art. 138; Anexo IX, item 15", status: "A validar"}
+  - {id: SAI-06, produto: "Hortícolas, frutas e ovos", ncm: "Anexo XV", tratamento: "Alíquota zero", efeito_debito: "Sem débito", fundamento: "Art. 148; Anexo XV", status: "A validar"}
+  - {id: SAI-07, produto: "Produtos da Cesta Básica Nacional (ex.: arroz, feijão, leite)", ncm: "Anexo I", tratamento: "Alíquota zero", efeito_debito: "Sem débito", fundamento: "Art. 125; Anexo I (conferir NCM exata)", status: "A validar"}
+  - {id: SAI-08, produto: "Café cru em grão", ncm: "090111", tratamento: "Redução 60%", efeito_debito: "Débito sobre 40% da alíquota padrão", fundamento: "Art. 137 (conferir outros anexos)", status: "A validar"}

@@ -1,0 +1,105 @@
+# Casos de teste — cada item simula uma linha de NF-e de compra do produtor.
+# Ao criar ou alterar regras, rode: python motor_regras.py
+casos:
+  - id: CT01
+    item: {descricao: "ADUBO NPK 04-14-08 SC 50KG", ncm: "3105.20.00", cfop: "5102", valor: 185000}
+    esperado: {categoria: INS.FER, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT02
+    item: {descricao: "UREIA AGRICOLA 46% N BIG BAG", ncm: "3102.10.10", cfop: "6102", valor: 92000}
+    esperado: {categoria: INS.FER, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT03
+    item: {descricao: "CALCARIO DOLOMITICO PRNT 90", ncm: "2521.00.00", cfop: "5102", valor: 48000}
+    esperado: {categoria: INS.COR, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT04
+    item: {descricao: "CIMENTO CP II 50KG", ncm: "2523.29.10", cfop: "5102", valor: 3200}
+    esperado: {categoria: MAT.CONST, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT05
+    item: {descricao: "HERBICIDA GLIFOSATO 480 SL 20L", ncm: "3808.93.24", cfop: "5102", valor: 64000}
+    esperado: {categoria: INS.DEF, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT06
+    item: {descricao: "INSETICIDA AEROSOL 300ML", ncm: "3808.91.99", cfop: "5102", valor: 45}
+    esperado: {categoria: PESS, tratamento: T04, efeito_credito: VEDADO, alertas: [REVISAR_USO_PESSOAL]}
+  - id: CT07
+    item: {descricao: "SEMENTE SOJA TMG 7063 C1 40KG", ncm: "1201.10.00", cfop: "5102", valor: 210000}
+    esperado: {categoria: INS.SEM, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT08
+    item: {descricao: "SOJA EM GRAOS", ncm: "1201.90.00", cfop: "5102", valor: 30000}
+    esperado: {categoria: GRAO, tratamento: T07, efeito_credito: REVISAR, alertas: [DEFINIR_DESTINACAO]}
+  - id: CT09
+    item: {descricao: "MILHO EM GRAO PARA RACAO", ncm: "1005.90.10", cfop: "5102", valor: 41000}
+    esperado: {categoria: PEC.NUT, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT10
+    item: {descricao: "SAL MIN BOVINOS 30KG", ncm: "2501.00.90", cfop: "5102", valor: 27000}
+    esperado: {categoria: PEC.NUT, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT11
+    item: {descricao: "RACAO CAES ADULTOS 15KG", ncm: "2309.10.00", cfop: "5102", valor: 180}
+    esperado: {categoria: ALIM.PET, tratamento: T07, efeito_credito: REVISAR, alertas: [REVISAR_USO_PESSOAL]}
+  - id: CT12
+    item: {descricao: "VACINA AFTOSA 50 DOSES", ncm: "3002.42.29", cfop: "5102", valor: 8500}
+    esperado: {categoria: PEC.SAN, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT13
+    item: {descricao: "IVERMECTINA 1% INJ 500ML", ncm: "3004.90.69", cfop: "5102", valor: 3900}
+    esperado: {categoria: PEC.SAN, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT14
+    item: {descricao: "DIPIRONA 500MG CX 10 COMP", ncm: "3004.49.90", cfop: "5102", valor: 12}
+    esperado: {categoria: MED.HUM, tratamento: T07, efeito_credito: REVISAR, alertas: [REVISAR_USO_PESSOAL]}
+  - id: CT15
+    item: {descricao: "OLEO DIESEL S10", ncm: "2710.19.21", cfop: "5656", valor: 156000, cnae_emitente: "4731-8/00"}
+    esperado: {categoria: COMB.DIE, tratamento: T03, efeito_credito: CREDITO_AD_REM}
+  - id: CT16
+    item: {descricao: "OL DIES S10 A GRANEL", ncm: "", cfop: "5656", valor: 22000}
+    esperado: {categoria: COMB.DIE, tratamento: T03, efeito_credito: CREDITO_AD_REM}
+  - id: CT17
+    item: {descricao: "GASOLINA COMUM", ncm: "2710.12.59", cfop: "5656", valor: 1200}
+    esperado: {categoria: COMB.GAS, tratamento: T07, efeito_credito: REVISAR, alertas: [REVISAR_USO_PESSOAL]}
+  - id: CT18
+    item: {descricao: "PNEU 18.4-34 R1 AGRICOLA", ncm: "4011.70.90", cfop: "6102", valor: 19800}
+    esperado: {categoria: MAN.PNE, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT19
+    item: {descricao: "TRATOR AGRICOLA 4X4 110CV", ncm: "8701.93.00", cfop: "5102", valor: 480000}
+    esperado: {categoria: IMOB.MAQ, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT20
+    item: {descricao: "FILTRO DE OLEO MOTOR", ncm: "8421.23.00", cfop: "5102", valor: 260}
+    esperado: {categoria: MAN.PEC, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT21
+    item: {descricao: "CERVEJA LATA 350ML", ncm: "2203.00.00", cfop: "5405", valor: 340}
+    esperado: {categoria: PESS, tratamento: T04, efeito_credito: VEDADO}
+  - id: CT22
+    item: {descricao: "REMESSA P/ CONSERTO BOMBA", ncm: "8413.70.10", cfop: "5915", valor: 7000}
+    esperado: {categoria: NEUTRO, tratamento: T05, efeito_credito: NEUTRO}
+  - id: CT23
+    item: {descricao: "FERTILIZANTE 20-00-20 ENTREGA FUTURA", ncm: "3105.20.00", cfop: "5922", valor: 350000}
+    esperado: {categoria: NEUTRO, tratamento: T05, efeito_credito: NEUTRO, alertas: [ENTREGA_FUTURA]}
+  - id: CT24
+    item: {descricao: "ADUBO FOLIAR 1L", ncm: "3105.90.90", cfop: "5102", valor: 2400, crt_emitente: "1"}
+    esperado: {categoria: INS.FER, tratamento: T01, efeito_credito: CREDITO_SIMPLES, alertas: [FORNECEDOR_SIMPLES]}
+  - id: CT25
+    item: {descricao: "BEZERRO NELORE DESMAMA", ncm: "0102.29.90", cfop: "5102", valor: 96000, doc_emitente: "123.456.789-09"}
+    esperado: {categoria: PEC.ANI, tratamento: T02, efeito_credito: CREDITO_PRESUMIDO, alertas: [FORNECEDOR_PESSOA_FISICA]}
+  - id: CT26
+    item: {descricao: "TOURO NELORE PO C/ RGD", ncm: "0102.21.90", cfop: "5102", valor: 45000}
+    esperado: {categoria: PEC.REP, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO, alertas: [CONFERIR_REGISTRO_GENEALOGICO]}
+  - id: CT27
+    item: {descricao: "MATERIAL CONF PEDIDO", ncm: "3926.90.90", cfop: "5102", valor: 5600}
+    esperado: {categoria: NC, tratamento: T07, efeito_credito: REVISAR, alertas: [DESCRICAO_GENERICA]}
+  - id: CT28
+    item: {descricao: "ARAME FARPADO 500M", ncm: "7313.00.00", cfop: "5102", valor: 6100}
+    esperado: {categoria: INFRA.CERCA, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT29
+    item: {descricao: "LENHA EUCALIPTO M3", ncm: "4401.12.00", cfop: "5102", valor: 18000}
+    esperado: {categoria: ENER.LENHA, tratamento: T00, efeito_credito: CREDITO_INTEGRAL}
+  - id: CT30
+    item: {descricao: "HERBICIDA 2,4-D AMINA 20L", ncm: "3105.20.00", cfop: "5102", valor: 15000}
+    esperado: {categoria: INS.FER, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO, alertas: [NCM_DESCRICAO_INCOERENTE]}
+  - id: CT31
+    item: {descricao: "SEMENTE BRACHIARIA BRIZANTHA", ncm: "", cfop: "5102", valor: 12000}
+    esperado: {categoria: INS.SEM, tratamento: T07, efeito_credito: REVISAR, alertas: [TRATAMENTO_INDEFINIDO]}
+  - id: CT32
+    item: {descricao: "CARNE BOVINA KG", ncm: "0201.30.00", cfop: "5102", valor: 900, cnae_emitente: "4711-3/02"}
+    esperado: {categoria: ALIM.FUNC, tratamento: T07, efeito_credito: REVISAR, alertas: [REVISAR_USO_PESSOAL]}
+  - id: CT33
+    item: {descricao: "INOCULANTE BRADYRHIZOBIUM SOJA", ncm: "3002.49.99", cfop: "5102", valor: 7400}
+    esperado: {categoria: INS.INO, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO}
+  - id: CT34
+    item: {descricao: "ADUBO NPK 10-10-10", ncm: "3105.20.00", cfop: "5102", valor: 30000, destinatario_ok: false}
+    esperado: {categoria: INS.FER, tratamento: T01, efeito_credito: SEM_CREDITO_DIFERIDO, alertas: [DESTINATARIO_DIVERGENTE]}
