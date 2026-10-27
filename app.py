@@ -18,12 +18,49 @@ from fornecedores import ConsultaCNPJ  # consulta de CNAE na BrasilAPI
 from leitor_nfe import importar  # leitura dos XMLs com a nfelib
 from motor_regras import BASE, Motor, estimar_credito  # motor de regras e estimativa de crédito
 
-# ------------------------------------------------------------------ configuração da página
+# ------------------------------------------------------------------ proteção contra execução direta
+# Se o arquivo for iniciado com "python app.py" ou pelo botão ▶ do VS Code, o Streamlit não está
+# ativo e a página não funcionaria. Nesse caso, o próprio app se reinicia do jeito certo.
+if __name__ == "__main__":  # o arquivo foi executado diretamente (não importado)
+    import sys  # acesso aos argumentos da linha de comando
+    from streamlit import runtime  # informa se o Streamlit está rodando este script
+    if not runtime.exists():  # executado pelo Python puro, sem o Streamlit
+        from streamlit.web import cli as stcli  # interface de linha de comando do Streamlit
+        sys.argv = ["streamlit", "run", str(Path(__file__).resolve())]  # equivale a "streamlit run app.py"
+        sys.exit(stcli.main())  # inicia o app pelo Streamlit e encerra esta execução
+
+# ------------------------------------------------------------------ identidade visual (Manual da Marca OBDC)
+PASTA_MARCA = BASE / "assets"  # pasta com os arquivos da marca
+LOGO = next((p for p in (PASTA_MARCA / "logo_obdc.png",  # arquivo oficial, quando for fornecido
+                         PASTA_MARCA / "logo_obdc_provisorio.png")  # recorte provisório do manual
+             if p.exists()), None)  # usa o primeiro que existir; None se nenhum existir
+ISOTIPO = PASTA_MARCA / "isotipo_obdc.png"  # símbolo "C." oficial (opcional)
+VERDE, AMARELO, CINZA = "#009490", "#FFC600", "#EBEBEB"  # cores institucionais do manual
+
 st.set_page_config(  # deve ser o primeiro comando do Streamlit
-    page_title="IAG 5.0 | Diagnóstico de créditos IBS/CBS",  # título da aba do navegador
-    page_icon="🌾",  # ícone da aba
+    page_title="OBDC | Diagnóstico de créditos IBS/CBS",  # título da aba do navegador
+    page_icon=str(ISOTIPO) if ISOTIPO.exists() else "🌾",  # ícone da aba: isotipo oficial, se houver
     layout="wide",  # usa a largura toda da tela
 )
+if LOGO:  # há arquivo de logotipo disponível
+    # logotipo horizontal no topo da barra lateral, na largura de referência do manual (214 px),
+    # para que o slogan "Você, satisfeito." continue legível
+    st.sidebar.image(str(LOGO), width=214)
+
+st.html(f"""<style>
+/* faixa institucional no topo da página: segmento verde seguido de segmento amarelo */
+.obdc-faixa {{display:flex; height:6px; margin:0 0 1rem 0; border-radius:3px; overflow:hidden;}}
+.obdc-faixa span:first-child {{flex:0 0 72%; background:{VERDE};}}
+.obdc-faixa span:last-child {{flex:1; background:{AMARELO};}}
+/* títulos no verde da marca, em caixa alta, com o filete amarelo à esquerda */
+h1 {{color:{VERDE} !important; text-transform:uppercase; border-left:6px solid {AMARELO};
+     padding-left:0.75rem !important;}}
+h2, h3 {{color:{VERDE} !important;}}
+/* indicadores: cartão cinza com filete amarelo, valor em verde */
+[data-testid="stMetric"] {{background:{CINZA}; border-left:5px solid {AMARELO}; border-radius:0.5rem;
+                           padding:0.75rem 1rem;}}
+[data-testid="stMetricValue"] {{color:{VERDE};}}
+</style>""")  # estilos complementares que o tema do Streamlit não cobre
 
 PASTA_EXEMPLOS = BASE / "exemplos"  # pasta com as notas fictícias
 ARQUIVO_CACHE_CNPJ = BASE / ".cache" / "cnpj.json"  # cache das consultas de CNPJ
@@ -193,6 +230,7 @@ with st.sidebar:  # tudo dentro deste bloco aparece na lateral
                "não devem conter dados reais de clientes.")  # aviso de LGPD
 
 # ------------------------------------------------------------------ área principal
+st.html('<div class="obdc-faixa"><span></span><span></span></div>')  # faixa verde e amarela do manual
 st.title("Diagnóstico de créditos IBS/CBS")  # título da página
 # parágrafo de texto
 st.write("Envie os XMLs das notas de compra do produtor. O sistema classifica cada item, aponta o efeito "
@@ -344,5 +382,5 @@ st.download_button("Baixar resultado em Excel", gerar_excel(df, resumo, rel),  #
 
 st.divider()  # linha separadora
 # texto pequeno de apoio
-st.caption("Estimativa de apoio à decisão, baseada na LC 214/2025 consolidada e em regras v1 ainda em revisão. "
+st.caption("OBDC | Você, satisfeito. Estimativa de apoio à decisão, baseada na LC 214/2025 consolidada e em regras v1 ainda em revisão. "
            "Não substitui a análise do contador ou parecer jurídico.")  # aviso final

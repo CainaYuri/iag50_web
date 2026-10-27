@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.cache/
+# Nunca versionar notas reais de clientes
+notas_reais/
+*.zip

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00"><NFe><infNFe Id="NFe31260311222333000181550010000015021719248655" versao="4.00">
+<ide><cUF>31</cUF><natOp>VENDA</natOp><mod>55</mod><serie>1</serie><nNF>1502</nNF><dhEmi>2026-03-15T10:00:00-03:00</dhEmi><tpNF>1</tpNF></ide>
+<emit><CNPJ>11222333000181</CNPJ><xNome>AGRO INSUMOS EXEMPLO LTDA</xNome><IE>0623456780090</IE><CNAE>4683400</CNAE><CRT>3</CRT></emit>
+<dest><CPF>39053344705</CPF><xNome>MARIA OLIVEIRA (OUTRO DESTINATARIO)</xNome><IE>0011112220033</IE></dest><entrega><CPF>52998224725</CPF><xLgr>ESTRADA MUNICIPAL KM 12</xLgr><nro>SN</nro><xBairro>ZONA RURAL</xBairro><cMun>3170206</cMun><xMun>UBERLANDIA</xMun><UF>MG</UF></entrega>
+<det nItem="1"><prod><cProd>ADB10</cProd><cEAN>SEM GTIN</cEAN><xProd>ADUBO NPK 10-10-10</xProd><NCM>31052000</NCM><CFOP>5102</CFOP><uCom>SC</uCom><qCom>200.0000</qCom><vUnCom>150.0000</vUnCom><vProd>30000.00</vProd></prod><imposto></imposto></det>
+</infNFe></NFe><protNFe versao="4.00"><infProt><chNFe>31260311222333000181550010000015021719248655</chNFe><nProt>131260000001502</nProt><cStat>100</cStat></infProt></protNFe></nfeProc>

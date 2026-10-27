@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00"><NFe><infNFe Id="NFe31260356781234000178550010000991201097222334" versao="4.00">
+<ide><cUF>31</cUF><natOp>VENDA</natOp><mod>55</mod><serie>1</serie><nNF>99120</nNF><dhEmi>2026-03-15T10:00:00-03:00</dhEmi><tpNF>1</tpNF></ide>
+<emit><CNPJ>56781234000178</CNPJ><xNome>SUPERMERCADO EXEMPLO LTDA</xNome><IE>ISENTO</IE><CNAE>4711302</CNAE><CRT>3</CRT></emit>
+<dest><CPF>52998224725</CPF><xNome>JOAO DA SILVA - FAZENDA BOA VISTA (EXEMPLO)</xNome><IE>0012345670012</IE></dest>
+<det nItem="1"><prod><cProd>CRN</cProd><cEAN>SEM GTIN</cEAN><xProd>CARNE BOVINA KG</xProd><NCM>02013000</NCM><CFOP>5102</CFOP><uCom>KG</uCom><qCom>60.0000</qCom><vUnCom>15.0000</vUnCom><vProd>900.00</vProd></prod><imposto></imposto></det>
+</infNFe></NFe><protNFe versao="4.00"><infProt><chNFe>31260356781234000178550010000991201097222334</chNFe><nProt>131260000099120</nProt><cStat>100</cStat></infProt></protNFe></nfeProc>

@@ -1,0 +1,38 @@
+# Tema visual do app conforme o Manual da Marca OBDC (2026)
+[theme]
+base = "light"                      # o manual não admite o logotipo verde sobre fundo escuro
+primaryColor = "#009490"            # Verde identifica: botões, seleções, barras de progresso
+backgroundColor = "#FFFFFF"         # fundo principal claro
+secondaryBackgroundColor = "#EBEBEB"  # Cinza organiza: fundo secundário e campos
+textColor = "#222222"               # texto corrido em cinza-escuro, como nas peças do manual
+linkColor = "#009490"               # links no verde da marca
+greenColor = "#009490"              # caixas de sucesso no verde da marca
+borderColor = "#D9D8D6"             # bordas no cinza claro da paleta (Cool Gray 1C)
+dataframeHeaderBackgroundColor = "#EBEBEB"  # cabeçalho das tabelas no cinza da marca
+showWidgetBorder = true             # contorno nos campos, para separar do fundo
+baseRadius = "0.5rem"               # cantos arredondados, como as formas da marca
+metricValueFontSize = "1.6rem"      # valores dos indicadores cabem nos cartões
+# Tipografia: família Roboto (manual, página "Tipografia"), servida pelo próprio app
+# (arquivo em static/, licença SIL Open Font License), sem depender do Google Fonts
+font = "Roboto, sans-serif"
+headingFont = "Roboto, sans-serif"
+baseFontWeight = 400                # Roboto Regular para textos corridos
+headingFontWeights = [900, 800, 700, 700, 700, 700]  # Black/ExtraBold em títulos, Bold em subtítulos
+chartCategoricalColors = ["#009490", "#FFC600", "#62CBC9", "#98989A", "#00BBB4", "#F8DF8D"]  # paleta e tons da marca
+
+[[theme.fontFaces]]
+family = "Roboto"                   # nome usado em font e headingFont
+url = "app/static/Roboto-Variable.ttf"  # fonte variável: todos os pesos em um só arquivo
+weight = "100 900"                  # do Thin ao Black
+style = "normal"
+
+[theme.sidebar]
+backgroundColor = "#EBEBEB"         # barra lateral no cinza da marca
+secondaryBackgroundColor = "#FFFFFF"  # campos brancos sobre o cinza
+
+[server]
+maxUploadSize = 200
+enableStaticServing = true          # permite servir a fonte da pasta static/
+
+[browser]
+gatherUsageStats = false

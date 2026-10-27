@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00"><NFe><infNFe Id="NFe31260323456789000195550010000882311202466334" versao="4.00">
+<ide><cUF>31</cUF><natOp>VENDA</natOp><mod>55</mod><serie>1</serie><nNF>88231</nNF><dhEmi>2026-03-15T10:00:00-03:00</dhEmi><tpNF>1</tpNF></ide>
+<emit><CNPJ>23456789000195</CNPJ><xNome>POSTO RODOVIA EXEMPLO LTDA</xNome><IE>ISENTO</IE><CNAE>4731800</CNAE><CRT>3</CRT></emit>
+<dest><CPF>52998224725</CPF><xNome>JOAO DA SILVA - FAZENDA BOA VISTA (EXEMPLO)</xNome><IE>0012345670012</IE></dest>
+<det nItem="1"><prod><cProd>DS10</cProd><cEAN>SEM GTIN</cEAN><xProd>OLEO DIESEL S10</xProd><NCM>27101921</NCM><CFOP>5656</CFOP><uCom>LT</uCom><qCom>25000.0000</qCom><vUnCom>6.2400</vUnCom><vProd>156000.00</vProd></prod><imposto></imposto></det><det nItem="2"><prod><cProd>GAS</cProd><cEAN>SEM GTIN</cEAN><xProd>GASOLINA COMUM</xProd><NCM>27101259</NCM><CFOP>5656</CFOP><uCom>LT</uCom><qCom>200.0000</qCom><vUnCom>6.1000</vUnCom><vProd>1220.00</vProd></prod><imposto></imposto></det><det nItem="3"><prod><cProd>CERV</cProd><cEAN>SEM GTIN</cEAN><xProd>CERVEJA LATA 350ML</xProd><NCM>22030000</NCM><CFOP>5405</CFOP><uCom>UN</uCom><qCom>48.0000</qCom><vUnCom>7.1000</vUnCom><vProd>340.80</vProd></prod><imposto></imposto></det>
+</infNFe></NFe><protNFe versao="4.00"><infProt><chNFe>31260323456789000195550010000882311202466334</chNFe><nProt>131260000088231</nProt><cStat>100</cStat></infProt></protNFe></nfeProc>
